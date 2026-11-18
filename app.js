@@ -80,25 +80,46 @@
 
   function renderFirms(scenarios, firms, tax) {
     const u = C.firmScenarios(scenarios, firms.total_assets, 0, firms.interest_rate, tax);
-    const l = C.firmScenarios(scenarios, firms.total_assets, firms.firm_l_debt, firms.interest_rate, tax);
     const headers = scenarios.map(s => 'p = ' + C.fmtNumber(s.probability, 2));
+    const rate = C.fmtPct(firms.interest_rate);
 
     document.getElementById('firms-intro').textContent =
       'Both firms have ' + C.fmtDollars(firms.total_assets) + ' of assets and a ' +
       C.fmtNumber(tax * 100, 0) + '% tax rate and face the same EBIT in each kind of year. ' +
-      'Firm L has ' + C.fmtDollars(firms.firm_l_debt) + ' of debt at ' + C.fmtPct(firms.interest_rate) + '.';
-    document.getElementById('firm-l-sub').textContent =
-      C.fmtDollars(firms.firm_l_debt) + ' debt at ' + C.fmtPct(firms.interest_rate);
-
+      'In the case, Firm L has ' + C.fmtDollars(firms.firm_l_debt) + ' of debt at ' + rate + '.';
+    document.getElementById('firm-l-rate-note').textContent =
+      'The interest rate is held at ' + rate + ' at every amount of debt, so the slider shows what debt does to ' +
+      'Firm L\'s return and risk, not how lenders would respond.';
     fillStatement(document.getElementById('firm-u'), headers, firmRows(u, tax));
-    fillStatement(document.getElementById('firm-l'), headers, firmRows(l, tax));
-    fillStatement(document.getElementById('firm-stats'), ['Firm U', 'Firm L'], [
-      { label: 'E(ROE)', cells: [C.fmtPct(u.eRoe), C.fmtPct(l.eRoe)] },
-      { label: 'σ(ROE)', cells: [C.fmtPct(u.sdRoe), C.fmtPct(l.sdRoe)] },
-      { label: 'CV', cells: [C.fmtNumber(u.cvRoe, 2), C.fmtNumber(l.cvRoe, 2)] },
-      { label: 'E(TIE)', cells: [C.fmtMult(u.eTie), C.fmtMult(l.eTie)] },
-      { label: 'σ(TIE)', cells: [C.fmtMult(u.sdTie), C.fmtMult(l.sdTie)] }
-    ]);
+
+    const slider = document.getElementById('firm-l-debt');
+    const out = document.getElementById('firm-l-debt-out');
+    slider.min = 0;
+    slider.max = firms.slider_max;
+    slider.step = firms.slider_step;
+    slider.value = firms.firm_l_debt;
+
+    function update() {
+      const debt = Number(slider.value);
+      const l = C.firmScenarios(scenarios, firms.total_assets, debt, firms.interest_rate, tax);
+      out.textContent = C.fmtDollars(debt);
+      slider.setAttribute('aria-valuetext', C.fmtDollars(debt));
+      document.getElementById('firm-l-sub').textContent = C.fmtDollars(debt) + ' debt at ' + rate;
+      fillStatement(document.getElementById('firm-l'), headers, firmRows(l, tax));
+      fillStatement(document.getElementById('firm-stats'), ['Firm U', 'Firm L'], [
+        { label: 'E(ROE)', cells: [C.fmtPct(u.eRoe), C.fmtPct(l.eRoe)] },
+        { label: 'σ(ROE)', cells: [C.fmtPct(u.sdRoe), C.fmtPct(l.sdRoe)] },
+        { label: 'CV', cells: [C.fmtNumber(u.cvRoe, 2), C.fmtNumber(l.cvRoe, 2)] },
+        { label: 'E(TIE)', cells: [C.fmtMult(u.eTie), C.fmtMult(l.eTie)] },
+        { label: 'σ(TIE)', cells: [C.fmtMult(u.sdTie), C.fmtMult(l.sdTie)] }
+      ]);
+    }
+    slider.addEventListener('input', update);
+    document.getElementById('btn-case').addEventListener('click', () => {
+      slider.value = firms.firm_l_debt;
+      update();
+    });
+    update();
     document.getElementById('firms').hidden = false;
   }
 
@@ -149,7 +170,82 @@
 
     renderBest(C.cdssBest(rows));
     showWarnings(C.cdssChecks(rows, base));
+    setUpCdssLever(rows, base, cdss.management_share, cdss.debt);
     document.getElementById('cdss').hidden = false;
+  }
+
+  function stakeText(s) {
+    if (s.status === 'sell') return 'Management would have to sell';
+    return C.fmtPct(s.stake);
+  }
+
+  function setUpCdssLever(rows, base, mgmtShare, currentDebt) {
+    const slider = document.getElementById('cdss-debt');
+    const out = document.getElementById('cdss-debt-out');
+    const note = document.getElementById('button-note');
+    slider.min = 0;
+    slider.max = rows.length - 1;
+    slider.step = 1;
+    const start = rows.findIndex(r => r.debt === currentDebt);
+    slider.value = start < 0 ? 0 : start;
+
+    function update() {
+      const r = rows[Number(slider.value)];
+      const c = r.caseMethod;
+      const m = r.newMethod;
+      const cs = C.managementStake(mgmtShare, base.shares, c.repurchased, c.remaining);
+      const ns = C.managementStake(mgmtShare, base.shares, m.repurchased, m.remaining);
+
+      out.textContent = C.fmtDollars(r.debt);
+      slider.setAttribute('aria-valuetext', C.fmtDollars(r.debt));
+
+      const panel = (method, stake, waccLabel) => [
+        { label: 'Share price', cells: [C.fmtCents(method.price)], cls: 'key' },
+        { label: 'Shares repurchased', cells: [C.fmtNumber(method.repurchased, 2)] },
+        { label: 'Shares remaining', cells: [C.fmtNumber(method.remaining, 2)] },
+        { label: 'EPS', cells: [C.fmtCents(method.eps)] },
+        { label: 'Dividends per share', cells: [C.fmtCents(method.dps)] },
+        { label: 'TIE', cells: [C.fmtMult(r.tie)] },
+        { label: waccLabel, cells: [C.fmtPct(method.wacc)] },
+        { label: 'Management\'s share', cells: [stakeText(stake)] }
+      ];
+      fillStatement(document.getElementById('case-panel'), [], panel(c, cs, 'WACC (book weights)'));
+      fillStatement(document.getElementById('new-panel'), [], panel(m, ns, 'WACC (market weights)'));
+
+      const notes = document.getElementById('stake-notes');
+      notes.textContent = '';
+      [['$20 buyback', cs], ['new-price buyback', ns]].forEach(([name, s]) => {
+        if (s.status === 'all') {
+          notes.appendChild(el('p', { class: 'note' }, 'With the ' + name +
+            ', the shares repurchased equal the outside investors\' shares, so no outside shareholders would be left.'));
+        } else if (s.status === 'sell') {
+          notes.appendChild(el('p', { class: 'warning' }, '⚠ With the ' + name +
+            ', the buyback needs more shares than outside investors own, so management would have to sell.'));
+        }
+      });
+
+      // Highlight this amount of debt in both tables.
+      ['case-table', 'new-table'].forEach(id => {
+        document.querySelectorAll('#' + id + ' tbody tr').forEach((tr, i) => {
+          tr.classList.toggle('selected', i === Number(slider.value));
+        });
+      });
+    }
+
+    function goTo(measure, name) {
+      const t = C.buttonTarget(rows, measure);
+      slider.value = t.index;
+      update();
+      note.textContent = t.agree
+        ? name + ': both buyback methods pick ' + C.fmtDollars(t.caseDebt) + '.'
+        : name + ': the $20 buyback picks ' + C.fmtDollars(t.caseDebt) + ' and the new-price buyback picks ' +
+          C.fmtDollars(t.newDebt) + '. The slider shows the $20 buyback\'s amount.';
+    }
+
+    slider.addEventListener('input', () => { note.textContent = ''; update(); });
+    document.getElementById('btn-best-price').addEventListener('click', () => goTo('price', 'Best price'));
+    document.getElementById('btn-high-eps').addEventListener('click', () => goTo('eps', 'Highest EPS'));
+    update();
   }
 
   function renderBest(b) {

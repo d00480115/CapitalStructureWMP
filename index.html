@@ -23,6 +23,14 @@
     <section id="firms" hidden>
       <h2>Firm U and Firm L <span class="tag">question c</span></h2>
       <p id="firms-intro" class="note"></p>
+      <div class="card lever">
+        <label for="firm-l-debt" class="lever-label">Firm L's debt <output id="firm-l-debt-out"></output></label>
+        <input type="range" id="firm-l-debt">
+        <div class="buttons">
+          <button type="button" id="btn-case">Case</button>
+        </div>
+        <p class="note" id="firm-l-rate-note"></p>
+      </div>
       <div class="firm-grid">
         <div class="card">
           <h3>Firm U <span class="sub">no debt</span></h3>
@@ -44,6 +52,28 @@
     <section id="cdss" hidden>
       <h2>CDSS at each amount of borrowing <span class="tag">question d</span></h2>
       <p id="cdss-intro" class="note"></p>
+
+      <div class="card lever">
+        <label for="cdss-debt" class="lever-label">CDSS's debt <output id="cdss-debt-out"></output></label>
+        <input type="range" id="cdss-debt" step="1">
+        <div class="buttons">
+          <button type="button" id="btn-best-price">Best price</button>
+          <button type="button" id="btn-high-eps">Highest EPS</button>
+        </div>
+        <p class="note" id="button-note" aria-live="polite"></p>
+        <p class="note">The slider stops only at the banker's amounts of borrowing.</p>
+        <div class="method-grid">
+          <div>
+            <h3>Buy back at today's <span class="p0"></span></h3>
+            <table class="stmt" id="case-panel"></table>
+          </div>
+          <div>
+            <h3>Buy back at the new price</h3>
+            <table class="stmt" id="new-panel"></table>
+          </div>
+        </div>
+        <div id="stake-notes"></div>
+      </div>
 
       <div class="card">
         <h3>Case method: buy back at today's <span class="p0"></span> <span class="tag">d(3), d(4), d(7)</span></h3>

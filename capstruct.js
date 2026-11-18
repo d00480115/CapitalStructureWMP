@@ -296,6 +296,32 @@
     };
   }
 
+  /*
+   * Management's stake after the buyback. Management doesn't sell, so
+   * stake = management's share × n / shares remaining.
+   *   status 'ok'   – a normal stake
+   *   status 'all'  – the buyback retires every outside share (stake 100%)
+   *   status 'sell' – the buyback needs more shares than outsiders own
+   */
+  function managementStake(mgmtShare, n, repurchased, remaining) {
+    const outside = (1 - mgmtShare) * n;
+    const tol = 1e-9 * Math.max(1, outside);
+    if (Math.abs(repurchased - outside) <= tol) return { stake: 1, status: 'all' };
+    if (repurchased > outside) return { stake: null, status: 'sell' };
+    return { stake: (mgmtShare * n) / remaining, status: 'ok' };
+  }
+
+  /*
+   * Where a button sends the CDSS slider. measure is 'price' or 'eps'.
+   * If both buyback methods pick the same amount, go there. If not, go to
+   * the case method's amount and say so. Exact ties go to the smaller debt.
+   */
+  function buttonTarget(rows, measure) {
+    const caseI = bestIndex(rows, r => r.caseMethod[measure], true);
+    const newI = bestIndex(rows, r => r.newMethod[measure], true);
+    return { index: caseI, caseDebt: rows[caseI].debt, newDebt: rows[newI].debt, agree: caseI === newI };
+  }
+
   // Checks that should hold. Each failure is a message to show on the page.
   function cdssChecks(rows, base) {
     const problems = [];
@@ -333,7 +359,8 @@
     parseCSV, num, itemsToObject, parseSchedule,
     expected, stdDev,
     firmScenarios,
-    cdssEbit, cdssAtDebt, cdssTable, cdssBest, cdssChecks
+    cdssEbit, cdssAtDebt, cdssTable, cdssBest, cdssChecks,
+    managementStake, buttonTarget
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

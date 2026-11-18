@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AGE Capital Structure</title>
+  <meta name="description" content="Campus Deli and Sub Shop's capital structure, worked out from the AGE case data.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <p class="eyebrow">FIN 4150 · AGE case</p>
+      <h1>Capital Structure Calculator</h1>
+      <p class="lede">Every number on this page is worked out in your browser from the files in <code>data/</code>.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="status" class="status" role="status">Loading the data…</div>
+    <div id="warnings"></div>
+
+    <section id="firms" hidden>
+      <h2>Firm U and Firm L <span class="tag">question c</span></h2>
+      <p id="firms-intro" class="note"></p>
+      <div class="firm-grid">
+        <div class="card">
+          <h3>Firm U <span class="sub">no debt</span></h3>
+          <table class="stmt" id="firm-u"></table>
+        </div>
+        <div class="card">
+          <h3>Firm L <span class="sub" id="firm-l-sub"></span></h3>
+          <table class="stmt" id="firm-l"></table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Return and risk</h3>
+        <table class="stmt" id="firm-stats"></table>
+        <p class="note">E = expected value (probability-weighted average). σ = standard deviation.
+          CV = coefficient of variation = σ(ROE) / E(ROE). Firm U pays no interest, so its TIE is n/a.</p>
+      </div>
+    </section>
+
+    <section id="cdss" hidden>
+      <h2>CDSS at each amount of borrowing <span class="tag">question d</span></h2>
+      <p id="cdss-intro" class="note"></p>
+
+      <div class="card">
+        <h3>Case method: buy back at today's <span class="p0"></span> <span class="tag">d(3), d(4), d(7)</span></h3>
+        <p class="note">Shares repurchased = D / P₀. EPS = net income / shares remaining.
+          Price = EPS / r<sub>s</sub>. WACC uses book weights: D/A × r<sub>d</sub>(1 − T) + (A − D)/A × r<sub>s</sub>.</p>
+        <table class="grid" id="case-table"></table>
+      </div>
+
+      <div class="card">
+        <h3>New-price method: buy back at the price after the announcement</h3>
+        <p class="note">Value of equity S = net income / r<sub>s</sub>. Value of the firm V = S + D. Price P = V / n.
+          Shares repurchased = D / P. WACC uses market weights: D/V × r<sub>d</sub>(1 − T) + S/V × r<sub>s</sub>.</p>
+        <table class="grid" id="new-table"></table>
+      </div>
+
+      <div class="card" id="best"></div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p>Data: <code>data/cdss.csv</code>, <code>data/assumptions.csv</code>, <code>data/banker_schedule.csv</code>,
+      <code>data/example_firms.csv</code>, <code>data/ebit_scenarios.csv</code>. Nothing leaves your device.</p>
+  </footer>
+
+  <script src="capstruct.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

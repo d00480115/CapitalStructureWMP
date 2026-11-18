@@ -1,0 +1,196 @@
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1c2430;
+  --muted: #5b6575;
+  --line: #dde2e9;
+  --accent: #b3261e;      /* Utah Tech red */
+  --accent-soft: #fbeceb;
+  --key: #0f4c81;
+  --warn-bg: #fff4d6;
+  --warn-line: #e0b84a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12161c;
+    --surface: #1b2129;
+    --text: #e6e9ee;
+    --muted: #9aa4b2;
+    --line: #2e3742;
+    --accent: #f08a82;
+    --accent-soft: #3a2224;
+    --key: #8cc0f0;
+    --warn-bg: #3a3014;
+    --warn-line: #a3852f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.site-header {
+  background: var(--surface);
+  border-bottom: 3px solid var(--accent);
+  padding: 20px 0 16px;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+h1 { margin: 4px 0 6px; font-size: 1.6rem; line-height: 1.2; }
+h2 { font-size: 1.25rem; margin: 28px 0 8px; }
+h3 { font-size: 1.02rem; margin: 0 0 8px; }
+
+.lede, .note { color: var(--muted); }
+.lede { margin: 0; }
+.note { font-size: 0.88rem; margin: 6px 0 10px; }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  overflow-wrap: anywhere;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 1px 8px;
+  vertical-align: middle;
+}
+
+.sub { color: var(--muted); font-weight: 400; font-size: 0.88rem; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+  min-width: 0;
+}
+
+.firm-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 16px;
+}
+@media (min-width: 760px) {
+  .firm-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.status { color: var(--muted); margin: 8px 0 16px; }
+
+.warning {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+}
+
+/* ---------- Tables ---------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+}
+
+th, td {
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+
+thead th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-bottom: 2px solid var(--line);
+  vertical-align: bottom;
+}
+
+tbody th { text-align: left; font-weight: 500; }
+
+.stmt tr.sum td, .stmt tr.sum th { font-weight: 600; }
+.stmt tr.key td, .stmt tr.key th { color: var(--key); font-weight: 600; }
+
+.grid thead th { white-space: normal; }
+.grid tbody th { font-weight: 600; }
+
+@media (max-width: 400px) {
+  .stmt { font-size: 0.82rem; }
+  .stmt th, .stmt td { padding: 4px 3px; }
+}
+
+/* On narrow screens each amount of borrowing becomes its own card,
+   so the page never scrolls sideways. */
+@media (max-width: 900px) {
+  .grid thead { display: none; }
+  .grid, .grid tbody, .grid tr, .grid th, .grid td { display: block; width: 100%; }
+  .grid tr {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+  }
+  .grid tbody th {
+    border-bottom: 2px solid var(--line);
+    text-align: left;
+    font-size: 1rem;
+    padding: 4px 0 6px;
+  }
+  .grid td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+  }
+  .grid td:last-child { border-bottom: 0; }
+  .grid td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    text-align: left;
+  }
+}
+
+.best-list { list-style: none; margin: 0; padding: 0; }
+.best-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.footer { color: var(--muted); font-size: 0.82rem; padding-top: 8px; padding-bottom: 32px; }
